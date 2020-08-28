@@ -9,7 +9,7 @@ Starter template for an Angular application with a variety of pre-configured too
 
 This a template for starting development on an Angular application.
 
-### Doesn't Angular have that already?
+### Doesn't Angular already have a template to get started with?
 
 Yes, but there a lot of tools and configurations that I like to use on basically every application I build.
 This template makes it easy to get started without having to worry about setting everything up.
