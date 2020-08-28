@@ -16,8 +16,8 @@ export class CookiesService {
     return this.cookieStore[key];
   }
 
-  public setCookie(key: string, value: string, expiration?: string) {
-    document.cookie = expiration ? `${key}=${value}; expires=${expiration}` : `${key}=${value}`;
+  public setCookie(key: string, value: string, expiration = '', additionalOptions = '') {
+    document.cookie = `${key}=${value}; expires=${expiration}${additionalOptions}`;
   }
 
   public removeCookie(key: string) {

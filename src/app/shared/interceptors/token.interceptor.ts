@@ -10,7 +10,7 @@ import { endpoints } from '../constants/endpoints.constant';
 export class TokenInterceptor implements HttpInterceptor {
   constructor(private sessionService: SessionService) {}
 
-  private whiteList: string[] = [endpoints.refreshAccessToken];
+  private whiteList: string[] = [endpoints.refreshAccessToken.url];
 
   private apiBaseUrl: string = environment.apiBaseUrl;
 

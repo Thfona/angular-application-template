@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { share, map } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 import { CookiesService } from './cookies.service';
 import { JwtService } from './jwt.service';
 import { LocalStorageService } from './local-storage.service';
-import { endpoints } from '../constants/endpoints.constant';
+import { authenticationPath, endpoints } from '../constants/endpoints.constant';
 
 @Injectable({
   providedIn: 'root'
@@ -28,21 +29,6 @@ export class SessionService {
 
   public set accessToken(value: string) {
     this._accessToken = value;
-  }
-
-  // Refresh Token
-  public get refreshToken(): string {
-    return this.cookiesService.getCookie(this.refreshTokenKey);
-  }
-
-  public set refreshToken(value: string) {
-    if (this.persistSession) {
-      const refreshTokenExpiration = new Date(this.getRefreshTokenExpirationDate()).toUTCString();
-
-      this.cookiesService.setCookie(this.refreshTokenKey, value, refreshTokenExpiration);
-    } else {
-      this.cookiesService.setCookie(this.refreshTokenKey, value);
-    }
   }
 
   // Persist Session
@@ -75,36 +61,13 @@ export class SessionService {
     this.accessToken = '';
   }
 
-  // Refresh Token methods
-  public isRefreshTokenInvalid(): boolean {
-    return this.jwtService.isTokenInvalid(this.refreshToken);
-  }
-
-  public isRefreshTokenExpired(): boolean {
-    return this.jwtService.isTokenExpired(this.refreshToken);
-  }
-
-  public getRefreshTokenExpirationDate(): Date {
-    return this.jwtService.getTokenExpirationDate(this.refreshToken);
-  }
-
-  public decodeRefreshToken(): any {
-    return this.jwtService.decodeToken(this.refreshToken);
-  }
-
-  public removeRefreshToken() {
-    this.cookiesService.removeCookie(this.refreshTokenKey);
-  }
-
   public refreshAccessToken(): Observable<string> {
     if (this.isAccessTokenExpired()) {
-      const url = endpoints.refreshAccessToken;
-      const refreshToken = this.refreshToken;
+      const url = endpoints.refreshAccessToken.url;
 
       const options = {
         headers: {
-          'Content-Type': 'application/json; charset=UTF-8',
-          Authorization: `Bearer ${refreshToken}`
+          'Content-Type': 'application/json; charset=UTF-8'
         }
       };
 
@@ -115,7 +78,7 @@ export class SessionService {
           const newRefreshToken = response.refreshToken;
 
           this.accessToken = accessToken;
-          this.refreshToken = newRefreshToken;
+          this.setRefreshToken(newRefreshToken);
 
           return accessToken;
         })
@@ -125,7 +88,38 @@ export class SessionService {
     return of(this.accessToken);
   }
 
+  // Refresh Token methods
+  public setRefreshToken(refreshToken: string) {
+    const refreshTokenAdditionalOptions = `; domain=${environment.apiBaseUrl}; path=${authenticationPath}; secure; HttpOnly`;
+
+    if (this.persistSession) {
+      const refreshTokenExpiration = new Date(this.jwtService.getTokenExpirationDate(refreshToken)).toUTCString();
+
+      this.cookiesService.setCookie(
+        this.refreshTokenKey,
+        refreshToken,
+        refreshTokenExpiration,
+        refreshTokenAdditionalOptions
+      );
+    } else {
+      this.cookiesService.setCookie(this.refreshTokenKey, refreshToken, '', refreshTokenAdditionalOptions);
+    }
+  }
+
+  // Other methods
   public logout() {
+    const url = endpoints.logout.url;
+    const accessToken = this.accessToken;
+
+    const options = {
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        Authorization: `Bearer ${accessToken}`
+      }
+    };
+
+    this.httpClient.post<any>(url, null, options);
+
     this.redirect();
     sessionStorage.clear();
     localStorage.clear();
