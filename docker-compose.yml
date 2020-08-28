@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  your-project-name-frontend:
+    image: your-project-name-frontend
+    build: .
+    environment: 
+      NODE_ENV: production
+      PORT: 4000
+    ports:
+      - 4000:4000
