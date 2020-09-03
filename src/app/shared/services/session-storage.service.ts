@@ -1,11 +1,41 @@
 import { Injectable } from '@angular/core';
+import { AppComponent } from 'src/app/app.component';
 
-type SessionStorageKey = any;
+type SessionStorageKey = 'persistSession' | 'lang';
 
+const handleSessionStorageFunction = () => {
+  const handle = <TFunction extends Function>(target: TFunction) => {
+    for (const prop of Object.getOwnPropertyNames(target.prototype)) {
+      const originalFunction: Function = target.prototype[prop];
+
+      if (originalFunction instanceof Function) {
+        target.prototype[prop] = function () {
+          if (this.sessionStorageEnabled) {
+            return originalFunction.apply(this, arguments);
+          }
+        };
+      }
+    }
+  };
+
+  return handle;
+};
+
+@handleSessionStorageFunction()
 @Injectable({
   providedIn: 'root'
 })
 export class SessionStorageService {
+  private sessionStorageEnabled = false;
+
+  constructor() {
+    AppComponent.isBrowser.subscribe((isBrowser) => {
+      if (isBrowser) {
+        this.sessionStorageEnabled = true;
+      }
+    });
+  }
+
   public has(key: SessionStorageKey): boolean {
     return key in sessionStorage;
   }

@@ -1,25 +1,25 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { share, map } from 'rxjs/operators';
-import { environment } from 'src/environments/environment';
-import { CookiesService } from './cookies.service';
 import { JwtService } from './jwt.service';
 import { LocalStorageService } from './local-storage.service';
-import { authenticationPath, endpoints } from '../constants/endpoints.constant';
+import { SessionStorageService } from './session-storage.service';
+import { endpoints } from '../constants/endpoints.constant';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SessionService {
   private _accessToken: string;
-  private refreshTokenKey = 'refreshToken';
 
   constructor(
     private httpClient: HttpClient,
-    private cookiesService: CookiesService,
+    private router: Router,
     private jwtService: JwtService,
-    private localStorageService: LocalStorageService
+    private localStorageService: LocalStorageService,
+    private sessionStorageService: SessionStorageService
   ) {}
 
   // Access Token
@@ -75,10 +75,8 @@ export class SessionService {
         share(),
         map((response) => {
           const accessToken = response.token;
-          const newRefreshToken = response.refreshToken;
 
           this.accessToken = accessToken;
-          this.setRefreshToken(newRefreshToken);
 
           return accessToken;
         })
@@ -86,24 +84,6 @@ export class SessionService {
     }
 
     return of(this.accessToken);
-  }
-
-  // Refresh Token methods
-  public setRefreshToken(refreshToken: string) {
-    const refreshTokenAdditionalOptions = `; domain=${environment.apiBaseUrl}; path=${authenticationPath}; secure; HttpOnly`;
-
-    if (this.persistSession) {
-      const refreshTokenExpiration = new Date(this.jwtService.getTokenExpirationDate(refreshToken)).toUTCString();
-
-      this.cookiesService.setCookie(
-        this.refreshTokenKey,
-        refreshToken,
-        refreshTokenExpiration,
-        refreshTokenAdditionalOptions
-      );
-    } else {
-      this.cookiesService.setCookie(this.refreshTokenKey, refreshToken, '', refreshTokenAdditionalOptions);
-    }
   }
 
   // Other methods
@@ -121,14 +101,12 @@ export class SessionService {
     this.httpClient.post<any>(url, null, options);
 
     this.redirect();
-    sessionStorage.clear();
-    localStorage.clear();
-    this.cookiesService.clearCookies();
+    this.sessionStorageService.clear();
+    this.localStorageService.clear();
     this.removeAccessToken();
   }
 
   private redirect() {
-    const origin = window.location.origin;
-    window.location.href = `${origin}`;
+    this.router.navigate(['']);
   }
 }

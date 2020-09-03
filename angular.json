@@ -144,6 +144,7 @@
         "serve-ssr": {
           "builder": "@nguniversal/builders:ssr-dev-server",
           "options": {
+            "port": 4000,
             "browserTarget": "your-project-name:build",
             "serverTarget": "your-project-name:server"
           },
