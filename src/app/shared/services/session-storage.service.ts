@@ -1,62 +1,43 @@
 import { Injectable } from '@angular/core';
 import { AppComponent } from 'src/app/app.component';
+import { isBrowserHandler } from '../utils/is-browser-handler.util';
 
-type SessionStorageKey = 'persistSession' | 'lang';
+type storageKey = 'persistSession' | 'lang';
 
-const handleSessionStorageFunction = () => {
-  const handle = <TFunction extends Function>(target: TFunction) => {
-    for (const prop of Object.getOwnPropertyNames(target.prototype)) {
-      const originalFunction: Function = target.prototype[prop];
-
-      if (originalFunction instanceof Function) {
-        target.prototype[prop] = function () {
-          if (this.sessionStorageEnabled) {
-            return originalFunction.apply(this, arguments);
-          }
-        };
-      }
-    }
-  };
-
-  return handle;
-};
-
-@handleSessionStorageFunction()
+@isBrowserHandler()
 @Injectable({
   providedIn: 'root'
 })
 export class SessionStorageService {
-  private sessionStorageEnabled = false;
+  private isBrowser: boolean;
 
   constructor() {
     AppComponent.isBrowser.subscribe((isBrowser) => {
-      if (isBrowser) {
-        this.sessionStorageEnabled = true;
-      }
+      this.isBrowser = isBrowser;
     });
   }
 
-  public has(key: SessionStorageKey): boolean {
+  public has(key: storageKey): boolean {
     return key in sessionStorage;
   }
 
-  public get(key: SessionStorageKey): string {
+  public get(key: storageKey): string {
     return sessionStorage.getItem(key);
   }
 
-  public getJson(key: SessionStorageKey): any {
+  public getJson(key: storageKey): any {
     return JSON.parse(this.get(key));
   }
 
-  public set(key: SessionStorageKey, value: string) {
+  public set(key: storageKey, value: string) {
     sessionStorage.setItem(key, value);
   }
 
-  public setJson(key: SessionStorageKey, value: any) {
+  public setJson(key: storageKey, value: any) {
     this.set(key, JSON.stringify(value));
   }
 
-  public remove(key: string) {
+  public remove(key: storageKey) {
     sessionStorage.removeItem(key);
   }
 

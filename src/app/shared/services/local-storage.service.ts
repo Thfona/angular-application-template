@@ -1,62 +1,43 @@
 import { Injectable } from '@angular/core';
 import { AppComponent } from 'src/app/app.component';
+import { isBrowserHandler } from '../utils/is-browser-handler.util';
 
-type LocalStorageKey = 'persistSession' | 'lang';
+type storageKey = 'persistSession' | 'lang';
 
-const handleLocalStorageFunction = () => {
-  const handle = <TFunction extends Function>(target: TFunction) => {
-    for (const prop of Object.getOwnPropertyNames(target.prototype)) {
-      const originalFunction: Function = target.prototype[prop];
-
-      if (originalFunction instanceof Function) {
-        target.prototype[prop] = function () {
-          if (this.localStorageEnabled) {
-            return originalFunction.apply(this, arguments);
-          }
-        };
-      }
-    }
-  };
-
-  return handle;
-};
-
-@handleLocalStorageFunction()
+@isBrowserHandler()
 @Injectable({
   providedIn: 'root'
 })
 export class LocalStorageService {
-  private localStorageEnabled = false;
+  private isBrowser: boolean;
 
   constructor() {
     AppComponent.isBrowser.subscribe((isBrowser) => {
-      if (isBrowser) {
-        this.localStorageEnabled = true;
-      }
+      this.isBrowser = isBrowser;
     });
   }
 
-  public has(key: LocalStorageKey): boolean {
+  public has(key: storageKey): boolean {
     return key in localStorage;
   }
 
-  public get(key: LocalStorageKey): string {
+  public get(key: storageKey): string {
     return localStorage.getItem(key);
   }
 
-  public getJson(key: LocalStorageKey): any {
+  public getJson(key: storageKey): any {
     return JSON.parse(this.get(key));
   }
 
-  public set(key: LocalStorageKey, value: string) {
+  public set(key: storageKey, value: string) {
     localStorage.setItem(key, value);
   }
 
-  public setJson(key: LocalStorageKey, value: any) {
+  public setJson(key: storageKey, value: any) {
     this.set(key, JSON.stringify(value));
   }
 
-  public remove(key: string) {
+  public remove(key: storageKey) {
     localStorage.removeItem(key);
   }
 
