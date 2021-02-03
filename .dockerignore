@@ -29,5 +29,6 @@
 **/karma.conf.js
 **/tsconfig.spec.json
 **/tslint.json
+**/docker.dev.env
 LICENSE
 README.md

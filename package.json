@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "ng serve --port 4000",
     "dev:ssr": "ng run your-project-name:serve-ssr",
+    "dev:docker": "docker-compose --env-file ./docker.dev.env up -d --build",
     "start": "node dist/server/main.js",
     "build": "ng build",
     "build:prod": "ng build --prod",

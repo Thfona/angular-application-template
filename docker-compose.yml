@@ -4,8 +4,8 @@ services:
   your-project-name-frontend:
     image: your-project-name-frontend
     build: .
-    environment: 
-      NODE_ENV: production
-      PORT: 4000
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=${PORT}
     ports:
       - 4000:4000

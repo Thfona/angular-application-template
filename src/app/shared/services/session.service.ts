@@ -74,7 +74,7 @@ export class SessionService {
       return this.httpClient.post<any>(url, null, options).pipe(
         share(),
         map((response) => {
-          const accessToken = response.token;
+          const accessToken = response.accessToken;
 
           this.accessToken = accessToken;
 
@@ -89,12 +89,10 @@ export class SessionService {
   // Other methods
   public logout() {
     const url = endpoints.logout.url;
-    const accessToken = this.accessToken;
 
     const options = {
       headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-        Authorization: `Bearer ${accessToken}`
+        'Content-Type': 'application/json; charset=UTF-8'
       }
     };
 

@@ -57,6 +57,9 @@ $ npm install
 $ npm run dev
 $ npm run dev:ssr
 
+# Start application in development mode using Docker
+$ npm run dev:docker
+
 # Start application in production mode
 $ npm start
 
