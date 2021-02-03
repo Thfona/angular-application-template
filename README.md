@@ -1,7 +1,7 @@
 <!--- Start of repository README -->
 # Angular Application Template
 
-Starter template for an Angular application with a variety of pre-configured tools. 
+Starter template for an Angular application with a variety of pre-configured tools.
 
 ## FAQ
 
